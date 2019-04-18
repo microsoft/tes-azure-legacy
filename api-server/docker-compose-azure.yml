@@ -1,0 +1,39 @@
+version: "3.3"
+
+services:
+  api:
+    image: "${DOCKER_IMAGE_BASE_URL}/tesazure/api"
+    restart: always
+    command: ["sh","-c","python -m flask create-db && python -m flask run --host 0.0.0.0 --port 80"] 
+    # command: ["sh","-c","python -m ptvsd --host 0.0.0.0 --port 8080 --multiprocess --wait -m flask run --host 0.0.0.0 --port 80 --no-debugger --no-reload"]
+    environment:
+      FLASK_APP: serve.py
+      FLASK_ENV: production
+      SITE_NAME: TES API Server for Azure Compute
+    ports:
+      - "80:80"
+    depends_on:
+      - worker
+
+  worker:
+    image: "${DOCKER_IMAGE_BASE_URL}/tesazure/api"
+    restart: always
+    command: [celery, worker, --app=worker.celery, --loglevel=INFO]
+    environment:
+      SITE_NAME: TES API Server Worker for Azure Compute
+
+  # Disabling for initial open source release - not working on Azure
+  # beat:
+  #  image: "${DOCKER_IMAGE_BASE_URL}/tesazure/api"
+  #  restart: always
+  #  command: [celery, beat, --app=worker.celery, --loglevel=INFO, --pidfile=/tmp/celeryd.pid]
+  #  environment:
+  #    SITE_NAME: tesazure-beat
+
+  local-forwarder:
+    image: "${DOCKER_IMAGE_BASE_URL}/tesazure/local-forwarder"
+    environment:
+      SITE_NAME: TES API Server Forwarder for Azure Compute
+    ports:
+      - "55678:55678"
+      - "50001:50001"

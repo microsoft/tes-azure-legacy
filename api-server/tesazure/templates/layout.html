@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title -%}{%- endblock %}</title>
+    {% assets "js_all" -%}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {%- endassets %}
+    {% assets "css_all" -%}
+        <link rel="stylesheet" href="{{ ASSET_URL }}">
+    {%- endassets %}
+</head>
+<body>
+    {% include 'components/menu.html' %}
+    <div class="container">
+        {% include 'components/flash.html' %}
+        {% block header -%}{%- endblock %}
+        {% block body -%}{%- endblock %}
+        {% block footer -%}{%- endblock %}
+        <hr />
+        <ul class="list-inline text-center">
+            <li><a href="#">{% trans %}Terms{% endtrans %}</a></li>
+            <li><a href="#">{% trans %}Privacy{% endtrans %}</a></li>
+            <li><a href="#">{% trans %}Security{% endtrans%}</a></li>
+            <li><span class="text-muted"><i class="fa fa-clock-o"></i> {{ g.request_time() }}</span></li>
+        </ul>
+    </div>
+</body>
+</html>

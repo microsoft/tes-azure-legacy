@@ -1,0 +1,16 @@
+{
+    "name": "tes-azure",
+    "version": "0.1.0",
+    "description": "A GA4GH Task Execution Service (TES) API Server for Azure Compute",
+    "main": "index.js",
+    "repository": "https://github.com/microsoft/tes-azure.git",
+    "author": "Microsoft Commercial Software Engineering (CSE) - Health Industry team",
+    "license": "MIT",
+    "dependencies": {
+        "bootbox": "4.4.0",
+        "bootstrap": "3.3.7",
+        "font-awesome": "4.7.0",
+        "jquery": "3.2.1",
+        "jquery-pjax": "2.0.1"
+    }
+}

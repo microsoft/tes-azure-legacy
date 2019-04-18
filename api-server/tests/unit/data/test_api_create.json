@@ -1,0 +1,53 @@
+{
+  "tags": {
+      "tag-key": "tag-value"
+  },
+  "executors": [
+      {
+          "stdout": "",
+          "image": "alpine",
+          "command": ["pwd"],
+          "env": {},
+          "workdir": "",
+          "stderr": "",
+          "stdin": ""
+      },
+      {
+          "stdout": "",
+          "image": "alpine",
+          "command": ["ls", "-l"],
+          "env": {},
+          "workdir": "",
+          "stderr": "",
+          "stdin": ""
+      }
+  ],
+  "description": "task-description",
+  "resources": {
+      "cpu_cores": 4,
+      "disk_gb": 4,
+      "preemptible": true,
+      "zones": "",
+      "ram_gb": 7
+  },
+  "inputs": [
+      {
+          "url": "https://tesazure.blob.core.windows.net/samples/random.dat",
+          "path": "random.dat",
+          "description": "input-description",
+          "name": "input-name",
+          "type": "FILE",
+          "content": null
+      }
+  ],
+  "name": "task-name",
+  "outputs": [
+      {
+          "url": "https://tesazure.blob.core.windows.net/samples/random.dat",
+          "path": "random.dat",
+          "description": "output-description",
+          "name": "output-name",
+          "type": "FILE"
+      }
+  ]
+}

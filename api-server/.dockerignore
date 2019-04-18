@@ -1,0 +1,5 @@
+terraform/*
+__pycache__/*
+tests//*
+*.env*
+.tox/*

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}{% trans %}Unauthorized{% endtrans %}{% endblock %}
+
+{% block header %}
+{% endblock %}
+
+{% block body %}
+    <h1>{% trans %}Unauthorized{% endtrans %}</h1>
+    <p>{% trans %}You're not allowed to do this.{% endtrans %}<p/>
+    <p><a href="{{ url_for('index') }}">{% trans %}Go somewhere nice{% endtrans %}</a></p>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

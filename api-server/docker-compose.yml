@@ -1,0 +1,63 @@
+version: "3.7"
+services:
+  postgres:
+    restart: always
+    image: postgres:10
+    environment:
+      - POSTGRES_USER=tesadmin
+      - POSTGRES_PASSWORD=testpassword
+      - POSTGRES_DB=tesapi
+    volumes:
+      - flask-app-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:latest
+
+  app:
+    restart: always
+    build: .
+
+    # VS Code debugger + wait for connect + no reload (auto-reload coming soon - see https://github.com/Microsoft/ptvsd/issues/1152)
+    #command: python -m ptvsd --host 0.0.0.0 --port 5050 --multiprocess --wait -m flask run --host 0.0.0.0 --port 5000 --no-debugger --no-reload
+
+    # Built-in debugger, auto-reload enabled
+    command: python -m flask run --host 0.0.0.0 --port 5000
+
+    env_file:
+      - api-server.env
+    ports:
+      - "5000:5000" # flask port
+      - "5050:5050" # debugger port
+    volumes:
+      - .:/var/www/tes-azure
+    depends_on:
+      - postgres
+      - worker
+
+  worker:
+      restart: always
+      build: .
+      command: celery worker -A worker.celery --loglevel=info
+      env_file:
+      - api-server.env
+      volumes:
+        - .:/var/www/tes-azure
+      depends_on:
+        - redis
+
+  beat:
+      restart: always
+      build: .
+      command: celery beat -A worker.celery --loglevel=info
+      env_file:
+      - api-server.env
+      volumes:
+        - .:/var/www/tes-azure
+      depends_on:
+        - redis
+
+volumes:
+  flask-app-db:
+    name: flask-app-db

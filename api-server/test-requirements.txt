@@ -1,0 +1,5 @@
+flake8==3.7.5
+pytest==4.2.1
+pytest-flask==0.14.0
+pytest-mock==1.10.1
+testtools

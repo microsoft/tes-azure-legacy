@@ -1,0 +1,29 @@
+{% macro sort_link(sort, selected_sort, order) %}
+    {% if sort == selected_sort %}
+        {% if order == 'asc' %}
+            <a data-pjax href="{{ url_for_other_page(sort=sort, order='desc') }}">{{ sort }}</a>
+            <i class="fa fa-chevron-up"></i>
+        {% else %}
+            <a data-pjax href="{{ url_for_other_page(sort=sort, order='asc') }}">{{ sort }}</a>
+            <i class="fa fa-chevron-down"></i>
+        {% endif %}
+    {% else %}
+        <a data-pjax href="{{ url_for_other_page(sort=sort, order='asc') }}">{{ sort }}</a>
+    {% endif %}
+{% endmacro %}
+
+{% macro table_header(datatable, actions=False) %}
+    <thead>
+        <tr>
+            {% for sort in datatable.sortables %}
+                <th>{{ sort_link(sort, datatable.selected_sort, datatable.selected_order) }}</th>
+            {% endfor %}
+            {% for name in datatable._columns %}
+                <th>{{ name }}</th>
+            {% endfor %}
+            {% if actions %}
+                <th></th>
+            {% endif %}
+        </tr>
+    </thead>
+{% endmacro %}

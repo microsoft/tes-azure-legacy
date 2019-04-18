@@ -1,0 +1,71 @@
+{
+  "tags": {
+      "tag-key": "tag-value"
+  },
+  "executors": [
+      {
+          "stdout": "",
+          "image": "alpine",
+          "command": ["pwd"],
+          "env": {},
+          "workdir": "",
+          "stderr": "",
+          "stdin": ""
+      },
+      {
+          "stdout": "/tes-wd/shared/executions/stdin.txt",
+          "image": "ubuntu:latest",
+          "command": ["ls", "-l"],
+          "env": {
+            "foo": "bar"
+          },
+          "workdir": "/tes-wd/shared",
+          "stderr": "/tes-wd/shared/executions/stderr.txt",
+          "stdout": "/tes-wd/shared/executions/stdout.txt"
+      },
+      {
+        "image": "ubuntu@sha256:868fd30a0e47b8d8ac485df174795b5e2fe8a6c8f056cc707b232d65b8a1ab68",
+        "command": ["cat"],
+        "env": {},
+        "workdir": "/tes-wd/shared",
+        "stderr": "",
+        "stdin": "/tes-wd/shared/executions/stdin.txt"
+    }
+  ],
+  "description": "task-description",
+  "resources": {
+      "cpu_cores": 4,
+      "disk_gb": 4,
+      "preemptible": true,
+      "zones": "",
+      "ram_gb": 7
+  },
+  "inputs": [
+      {
+          "url": "https://tesazure.blob.core.windows.net/samples/random.dat",
+          "path": "random.dat",
+          "description": "input-description",
+          "name": "input-name",
+          "type": "FILE",
+          "content": null
+      },
+      {
+        "path": "/tes-wd/shared/script",
+        "description": "Should echo OK",
+        "url": "",
+        "content": "#!/bin/bash\necho \"OK\"",
+        "name": "commandScript",
+        "type": "FILE"
+    }
+  ],
+  "name": "task-name",
+  "outputs": [
+      {
+          "url": "https://tesazure.blob.core.windows.net/samples/random.dat",
+          "path": "random.dat",
+          "description": "output-description",
+          "name": "output-name",
+          "type": "FILE"
+      }
+  ]
+}

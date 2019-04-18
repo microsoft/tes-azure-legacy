@@ -1,0 +1,16 @@
+body {
+    margin: 0;
+    padding-top: 70px;
+    padding-bottom: 70px;
+}
+
+.container {
+    max-width: 100%;
+}
+
+.pagination_total {
+    height: 34px;
+    position: relative;
+    top: -12px;
+    margin-left: 10px;
+}
