@@ -14,8 +14,7 @@ resources/cromwell/*.jar
 cromwell-workflow-logs/
 cromwell-executions/
 
-# Pipenv - we use requirements.txt
-Pipfile
+# Pipenv - we use a non-locked Pipfile to generate requirements.txt
 Pipfile.lock
 
 # Common

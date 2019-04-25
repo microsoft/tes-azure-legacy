@@ -65,11 +65,11 @@ resource "azurerm_postgresql_server" "sql" {
 }
 
 resource "azurerm_postgresql_database" "db" {
-  name                = "tesapi"
+  name                             = "tesapi"
   resource_group_name = "${azurerm_resource_group.rg.name}"
-  server_name         = "${azurerm_postgresql_server.sql.name}"
-  charset             = "UTF8"
-  collation           = "English_United States.1252"
+  server_name                = "${azurerm_postgresql_server.sql.name}"
+  charset                          = "UTF8"
+  collation                         = "English_United States.1252"
 
   depends_on = [
     "azurerm_postgresql_server.sql"
@@ -78,11 +78,11 @@ resource "azurerm_postgresql_database" "db" {
 
 // Currently will fail because of - https://github.com/MicrosoftDocs/azure-docs/issues/20758
 resource "azurerm_postgresql_firewall_rule" "db" {
-  name                = "AllowAllWindowsAzureIps"
+  name                             = "AllowAllWindowsAzureIps"
   resource_group_name = "${azurerm_resource_group.rg.name}"
-  server_name         = "${azurerm_postgresql_server.sql.name}"
-  start_ip_address    = "0.0.0.0"
-  end_ip_address      = "0.0.0.0"
+  server_name                = "${azurerm_postgresql_server.sql.name}"
+  start_ip_address          = "0.0.0.0"
+  end_ip_address           = "0.0.0.0"
 
   depends_on = [
     "azurerm_postgresql_server.sql"
@@ -90,7 +90,7 @@ resource "azurerm_postgresql_firewall_rule" "db" {
 }
 
 locals {
-  postgres_connection_string = "postgresql+psycopg2://${azurerm_postgresql_server.sql.administrator_login}${urlencode("@")}${azurerm_postgresql_server.sql.name}:${urlencode(azurerm_postgresql_server.sql.administrator_login_password)}@${azurerm_postgresql_server.sql.name}.postgres.database.azure.com:5432/${azurerm_postgresql_database.db.name}"
+  tes_database_connection_string = "postgresql+psycopg2://${azurerm_postgresql_server.sql.administrator_login}${urlencode("@")}${azurerm_postgresql_server.sql.name}:${urlencode(azurerm_postgresql_server.sql.administrator_login_password)}@${azurerm_postgresql_server.sql.name}.postgres.database.azure.com:5432/${azurerm_postgresql_database.db.name}",
 }
 
 #########################
@@ -215,9 +215,9 @@ resource "azurerm_key_vault_access_policy" "client_id" {
     "azurerm_key_vault.vault"
   ]
 }
-resource "azurerm_key_vault_secret" "postgres_connection_string" {
+resource "azurerm_key_vault_secret" "tes_database_connection_string" {
   name           = "TESAZURE-SQLALCHEMY-DATABASE-URI"
-  value            = "${local.postgres_connection_string}"
+  value            = "${local.tes_database_connection_string}"
   key_vault_id = "${azurerm_key_vault.vault.id}"
 
   depends_on = [

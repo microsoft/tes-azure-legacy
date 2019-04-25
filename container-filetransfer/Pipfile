@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+azure-storage-blob = "*"
+boto3 = "*"
+google-cloud-storage = "*"
+paramiko = "*"
+pycosio = {editable = true,git = "https://github.com/Accelize/pycosio"}
+python-dateutil = "*"
+requests = "*"
+rfc6266 = "*"
+urllib3 = "*"
+
+[requires]
+python_version = "3.6"

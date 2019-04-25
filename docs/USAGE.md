@@ -34,21 +34,18 @@ terraform init
 terraform plan -var 'resource_group_name=<rg_name>' -var 'resource_group_location=<rg_location>' -var 'acr_login_username=<username>' -var 'acr_login_password=<password>' -out=plan
 
 terraform apply "plan"
-
-# Terraform Postgres Firewall Rule Currently has a bug - add it manually until it is resolved - this will report failure but likely succeed
-# https://github.com/MicrosoftDocs/azure-docs/issues/20758
-az postgres server firewall-rule create -g $(terraform output resource_group) -s $(terraform output postgres_name) -n AllowAllWindowsAzureIps --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
 ```
 
 Terraform will automatically provision the API server as a web app on Azure App service along with its dependencies (Azure Container Registry, App Insights, Redis, Azure DB for PostgreSQL, Key Vault) and place the connection secrets in Key Vault for you. The deployment takes approximately 20 minutes to complete.
 
 Resource information (including URL) to the App Service instance created will be printed by Terraform upon completion, for example:
 ```
-app_id = 4796982d-3ae8-4cc6-8ecf-0db1e8c4216a
 app_service_default_hostname = https://tesazure-RANDOMID.azurewebsites.net
 app_service_name = tesazure-RANDOMID
-resource_group = tesazure2
+resource_group = tesazure
 ```
+
+NOTE: Currently, there is a bug in the PostgreSQL firewall rule API for Azure which should be fixed in June. You may see an error during provisioning related to the firewall rule ([more information here](https://github.com/MicrosoftDocs/azure-docs/issues/20758)).
 
 
 ### b. Initialize the app
@@ -75,9 +72,9 @@ Application configuration may be performed by setting environment variables. On 
 
 The API server will automatically override a configuration parameter named `CONFVAR` if it finds a corresponding environment variable with the `APP_` prefix (i.e., named `APP_CONFVAR`).
 
-Configuration parameters may also be performed by adding values to Azure Key Vault. Once setup, the TES API will attempt to pull the secrets specified in the `KEYVAULT_SECRETS` configuration value on startup and override any values currently set in configuration. Since Key Vault doesn't support underscores, any secret name with a dash will be set in configuration with an underscore instead to match Flask configuration standards.
+Configuration parameters may also be performed by adding values to Azure Key Vault. Once setup, the TES API will automaticall override a configuration parameter named `CONFVAR` if it finds a corresponding secret with the `TESAZURE-` prefix (i.e., named `TESAZURE-CONFVAR`). Since Key Vault doesn't support underscores, any secret name with a dash will be set in configuration with an underscore instead to match Flask configuration standards.
 
-The provisioners below take care of this initial configuration for you; but if manually setting up an instance of the Docker image, to connect a Key Vault the `KEYVAULT_URL` configuration value must be set at a minumum. If you are not using a Managed Service Identity, you also need to set the `AZURE_CLIENT_ID`, `AZURE_SECRET`, and `AZURE_TENANT` configuration values for a service principle with access to the Key Vault.
+The provisioners below take care of this initial configuration for you; but if manually setting up an instance of the Docker image, to connect a Key Vault the `KEYVAULT_URL` configuration value must be set at a minumum. Since using a Managed Service Identity is not yet supported, you also need to set the `AZURE_CLIENT_ID`, `AZURE_SECRET`, and `AZURE_TENANT` configuration values for a service principle with access to the Key Vault.
 
 There are more configuration parameters than listed here; **see [`config.py`](/tesazure/config.py) for the full list of supported configuration parameters.**
 

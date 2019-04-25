@@ -64,7 +64,8 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
 
         self.batch_client = azbatch.batch_service_client.BatchServiceClient(
             self.credentials,
-            base_url=current_app.config['BATCH_ACCOUNT_URL'])
+            current_app.config['BATCH_ACCOUNT_URL']
+        )
 
     def _initializePoolKeywordArgs(self, vm_size):
         """Returns kwargs used for pool initialization."""

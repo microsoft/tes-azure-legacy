@@ -131,7 +131,7 @@ docker-compose up -d
 ### Local environment setup
 We highly recommend using virtual environments with [pipenv](https://pipenv.readthedocs.io/en/latest/). Once installed, setup your local environment with a simple:
 ```bash
-pipenv install -r requirements.txt
+pipenv install -d
 ```
 
 You will need to bring your own postgresql server and configure the `SQLALCHEMY_DATABASE_URI` configuration variable accordingly. Edit Copy `api-server.env.sample` to `api-server.env` and edit it:
@@ -187,7 +187,7 @@ pipenv run python -m ptvsd --host 0.0.0.0 --port 5050 -m flask run --host 0.0.0.
 ### Testing locally
 To test locally, install dependencies into your virtual environment:
 ```bash
-pipenv install -r test-requirements.txt tox
+pipenv install -d
 ```
 
 #### Running tox locally
@@ -205,9 +205,9 @@ If you add a dependency, remember to refresh the Tox environment with `pipenv ru
 
 
 #### Running unit tests locally
-Unit tests `pipenv install pytest` and then simply run `pytest` to start unit tests. A specific test file's path can be specified to only run that test.
+Run `pipenv run pytest` to start unit tests. A specific test file's path can be specified to only run that test.
 
-If you are debugging and want to prevent output capture (i.e. to permit `print()` calls in unit tests, use `pytest -s`).
+If you are debugging and want to prevent output capture (i.e. to permit `print()` calls in unit tests, use the `-s` argument).
 
 
 ## Testing the API (i.e. submitting tasks)
