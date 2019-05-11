@@ -161,7 +161,7 @@ def download_http(url, path):
         if os.path.isdir(path):
             local_file = os.path.join(path, determine_filename_for_requests(response))
         else:
-            local_file = determine_filename_for_requests(response)
+            local_file = path
         with open(local_file, 'wb') as fh:
             shutil.copyfileobj(response.raw, fh)
 
@@ -171,11 +171,14 @@ def download_http_auto(url, path):
         logger.warning(f"[http-auto] Skipping download of '{url}' because of incorrect scheme")
         return False
 
-    provider = cloud_provider_from_url(url)
-    if provider:
-        return download(url, path, force_handler=provider)
-    else:
-        return download_http(url, path)
+    # Disabled until we can fix pycosio >8MB
+    # provider = cloud_provider_from_url(url)
+    # if provider:
+    #     return download(url, path, force_handler=provider)
+    # else:
+    #     return download_http(url, path)
+
+    return download_http(url, path)
 
 
 def download_amazon_s3(url, path):
@@ -240,7 +243,7 @@ def download_azure_blob(url, path):
         # remove query string from blob_url, pycosio will think it's part of the filename
         blob_url = urljoin(url, urlparse(url).path)
 
-        path_components = urlparse(url).path.strip('/').split('/', 2)
+        path_components = urlparse(url).path.strip('/').split('/', 1)
         if len(path_components) == 2 and path_components[1]:
             pycosio.copyfile(blob_url, os.path.abspath(path))
         else:
@@ -318,21 +321,39 @@ def upload_azure_blob(path, url):
         pycosio.mount(storage='azure_blob', storage_parameters=parameters)
 
         # remove query string from blob_url, pycosio will think it's part of the filename
-        path_components = urlparse(url).path.strip('/').split('/', 2)
+        path_components = urlparse(url).path.strip('/').split('/', 1)
         if not path_components or not path_components[0]:
             # just the account was given
             logger.warning(f"[azure-blob] Skipping upload to '{url}' because no container was provided")
             return False
         elif len(path_components) == 2 and path_components[1]:
             # full container+blob filename was given
-            blob_url = urljoin(url, urlparse(url).path)
-            pycosio.copyfile(path, blob_url)
+            if os.path.isdir(path):
+                for root, dirs, files in os.walk(path, topdown=False):
+                    if root.startswith(path):
+                        root = root[len(path)+1:]
+                    for name in files:
+                        blob_url = urljoin(url, posixpath.join(urlparse(url).path, root, name))
+                        pycosio.copyfile(os.path.join(path, root, name), blob_url)
+            else:
+                blob_url = urljoin(url, urlparse(url).path)
+                pycosio.copyfile(path, blob_url)
         else:
             # container without blob filename was given
             container = urlparse(url).path[1:]
             filename = posixpath.basename(path)
-            blob_url = urljoin(url, posixpath.join(container, filename))
-            pycosio.copyfile(path, blob_url)
+
+            if os.path.isdir(path):
+                for root, dirs, files in os.walk(path, topdown=False):
+                    if root.startswith(path):
+                        root = root[len(path)+1:]
+                    for name in files:
+                        print(root, name)
+                        blob_url = urljoin(url, posixpath.join(urlparse(url).path, root, name))
+                        pycosio.copyfile(os.path.join(path, root, name), blob_url)
+            else:
+                blob_url = urljoin(url, posixpath.join(container, filename))
+                pycosio.copyfile(path, blob_url)
     else:
         logger.warning(f"[azure-blob] Skipping upload to '{url}' because of incorrect scheme")
         return False

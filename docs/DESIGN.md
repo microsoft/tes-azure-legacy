@@ -17,6 +17,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Batch](#batch)
   - [AKS](#aks)
 - [File transfer container](#file-transfer-container)
+- [Use with workflow engines](#use-with-workflow-engines)
+  - [Cromwell](#cromwell)
 - [Known limitations](#known-limitations)
 
 ## Context
@@ -90,6 +92,47 @@ We have a proposed architecture for the backend execution, but it is not impleme
 The file transfer container (`containter-filetransfer` subfolder of this repo) contains a small Python script that leverages [pycosio](https://pycosio.readthedocs.io/en/stable/) to perform file I/O in a consistent manner across multiple against cloud.
 
 This script is containerized and used to marshal the TES task input (downloads) and outputs (uploads). This approach was taken over platform-native approaches in Azure Batch or other backends in order to provide a consistent experience for TES input/output file management across backends - one that can be leveraged by Batch, AKS, etc.
+
+## Use with workflow engines
+While the API server exposes a TES-compatible API which can be called upon standalone, a typical real-world usage of the project will also include a workflow engine like Cromwell pointing to the TES API Server.
+
+In order to enhance user experience, the API server introspects tasks in attempt to determine which workflow engine is submitting a task, and if successful, tags the detected properties about the workflow under a set of `ms-submitter` headers:
+* `ms-submitter-name`: name of the workflow engine (e.g. `cromwell`)
+* `ms-submitter-workflow-id`: Identifier across all TES tasks used by the submitter (e.g. Cromwell's workflow ID)
+* `ms-submitter-workflow-name`: Human-readable name of the workflow used by the submitter (e.g. WDL workflow name)
+* `ms-submitter-workflow-stage`: Stage of the workflow that the task represents (e.g. name of the call from WDL workflow file)
+
+Once these tags are available, compute backends are able to customize behavior for different workflow engines as noted below.
+
+### Cromwell
+As of writing, the [Cromwell TES backend](https://cromwell.readthedocs.io/en/stable/backends/TES/) is limited to interacting with the local filesystem. As such, all generated TES inputs and outputs are local paths, for example:
+```json
+{
+  ...
+  "outputs": [
+    {
+      "name": "rc",
+      "description": "MultiStep.Merge.rc",
+      "url": "/tes-wd/shared-global/MultiStep/bded96bd-8d21-45c5-b956-2089ed4996ec/call-Merge/execution/rc",
+      "content": null,
+      "type": "FILE",
+      "path": "/tes-wd/shared-global/MultiStep/bded96bd-8d21-45c5-b956-2089ed4996ec/call-Merge/execution/rc"
+    },
+    ...
+  ]
+  ...
+}
+```
+
+Cromwell is considered the submitter when:
+1. A task has an output ending with `execution/rc`, `execution/stdout` and `execution/stderr`
+2. The `execition/rc` output's full path is of format `/tes-wd/.../{STRING}/{GUID}/call-{STRING}/execution/rc`
+3. Task description is `:`-delimited and its first field is a GUID, and this GUID matches the GUID from the `exection/rc` output path
+
+When Cromwell is detected, the TES input and output URL fields are mangled to use a blob SAS URI instead - see the Cromwell section in [USAGE](USAGE.md) for details.
+
+A workaround is also implemented as certain inline WDL functions like `write_tsv()` in workflow calls are performed server-side before tasks are sent to the compute note, and the output file of the inline code executed by Cromwell is also not included in the task's inputs. Therefore any files that exist in the `execution` directory of a task that are not already TES task inputs are injected as TES task inputs.
+
 
 ## Known limitations
 The following issues are known at this time and we would like to address them at a future date:

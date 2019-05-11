@@ -38,7 +38,7 @@ class MockBackend(AbstractComputeBackend):
         """Configure the backend to be ready to accept tasks"""
         return [tesmodels.TesTask(id='foo'), tesmodels.TesTask(id='bar')]
 
-    def service_info(self):
+    def service_info(self, debug=False):
         """
         Get service details and capacity availability. Implementation gets
         merged with API's defaults, overriding keys if there is overlap.

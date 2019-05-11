@@ -67,6 +67,3 @@ sqlalchemy-json = "*"
 SQLAlchemy-Utils = "*"
 webassets = "*"
 WTForms = "*"
-
-[requires]
-python_version = "3.6"

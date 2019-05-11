@@ -1,5 +1,5 @@
 #########################
-# Setup 
+# Setup
 #########################
 
 # Authenticates using Azure CLI
@@ -282,21 +282,23 @@ resource "azurerm_app_service" "default" {
     APPINSIGHTS_INSTRUMENTATIONKEY               = "${azurerm_application_insights.default.instrumentation_key}"
     DOCKER_REGISTRY_SERVER_URL                    = "${var.acr_login_server}"
     DOCKER_IMAGE_BASE_URL                                = "${local.docker_base_registry}"
-    DOCKER_REGISTRY_SERVER_USERNAME       = "${var.acr_login_username}"
-    DOCKER_REGISTRY_SERVER_PASSWORD       = "${var.acr_login_password}"
+    DOCKER_REGISTRY_SERVER_USERNAME        = "${var.acr_login_username}"
+    DOCKER_REGISTRY_SERVER_PASSWORD        = "${var.acr_login_password}"
+    APP_PRIVATE_DOCKER_REGISTRY_URL            = "${local.docker_base_registry}"
+    APP_PRIVATE_DOCKER_REGISTRY_USERNAME       = "${var.acr_login_username}"
+    APP_PRIVATE_DOCKER_REGISTRY_PASSWORD       = "${var.acr_login_password}"
     APP_SECRET_KEY                                                 = "${random_string.flask_secret_key.result}"
     APP_KEYVAULT_URL                                             = "${azurerm_key_vault.vault.vault_uri}"
     APP_AZURE_CLIENT_ID                                        = "${azuread_application.tesazure.application_id}"
     APP_AZURE_SECRET                                            = "${random_string.spn_password.result}"
     APP_AZURE_TENANT                                            = "${data.azurerm_client_config.current.tenant_id}"
-    APP_POOL_DEDICATED_NODE_COUNT             = 0
-    APP_POOL_LOW_PRIORITY_NODE_COUNT       = 2
-    APP_POOL_VM_SIZE                                              = "STANDARD_A1"
-    APP_STANDARD_OUT_FILENAME                        = "stdout.txt"
+    APP_BATCH_POOL_DEDICATED_NODE_COUNT             = 0
+    APP_BATCH_POOL_LOW_PRIORITY_NODE_COUNT       = 1
     APP_COMPUTE_BACKEND                                    = "batch"
     PYTHONUNBUFFERED                                          = 1
     OCAGENT_TRACE_EXPORTER_ENDPOINT        = "local-forwarder:55678"
     WEBSITE_HTTPLOGGING_RETENTION_DAYS    = 3
+    APP_FILETRANSFER_CONTAINER_IMAGE      = "${local.docker_base_registry}/tesazure/container-filetransfer:latest"
   }
 
   site_config {

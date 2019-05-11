@@ -117,7 +117,16 @@ def load_keyvault_config(app):
 def validate_config(app):
     """Ensures no invalid configuration is present"""
     # TODO: make a pluggable call to compute backend to validate their config
+    if app.env == 'test':
+        # do not validate during test bench
+        return
+
     if app.config['TASK_ACCESS_RESTRICTIONS'] not in [None, 'per-user', 'per-tenant']:
         raise ValueError("Invalid value for TASK_ACCESS_RESTRICTIONS")
     if app.config['COMPUTE_BACKEND'] not in ['mock', 'aks', 'batch']:
         raise ValueError("Invalid value for COMPUTE_BACKEND")
+    if not app.config.get('STORAGE_ACCOUNT_NAME', False) or not app.config.get('STORAGE_ACCOUNT_KEY', False):
+        raise ValueError("You must provide storage account information")
+    if app.config['COMPUTE_BACKEND'] == 'batch':
+        if not app.config.get('BATCH_ACCOUNT_NAME', False) or not app.config.get('BATCH_ACCOUNT_KEY', False) or not app.config.get('BATCH_ACCOUNT_URL', False):
+            raise ValueError("You must provide batch account information to use the batch backend")

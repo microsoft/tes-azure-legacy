@@ -1,0 +1,102 @@
+{
+    "inputs": [
+        {
+            "content": null,
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-Conversion/execution/input_file.50m.converted",
+            "name": "MultiStep.SliceBytes.input_file.0",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-Conversion/execution/input_file.50m.converted",
+            "description": "MultiStep.MultiStep.SliceBytes.input_file.0",
+            "type": "FILE"
+        },
+        {
+            "content": null,
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/script",
+            "name": "commandScript",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/script",
+            "description": "MultiStep.SliceBytes.commandScript",
+            "type": "FILE"
+        }
+    ],
+    "tags": {},
+    "executors": [
+        {
+            "stderr": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/stderr",
+            "stdout": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/stdout",
+            "workdir": "",
+            "env": {},
+            "stdin": "",
+            "image": "frolvlad/alpine-bash@sha256:19923a0a38cc1c1b6efdfa36d261e956a40f6b331e32b8c71c491fd47b76449a",
+            "command": [
+                "/bin/bash",
+                "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/script"
+            ]
+        }
+    ],
+    "outputs": [
+        {
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/rc",
+            "name": "rc",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/rc",
+            "description": "MultiStep.SliceBytes.rc",
+            "type": "FILE"
+        },
+        {
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/stdout",
+            "name": "stdout",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/stdout",
+            "description": "MultiStep.SliceBytes.stdout",
+            "type": "FILE"
+        },
+        {
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/stderr",
+            "name": "stderr",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/stderr",
+            "description": "MultiStep.SliceBytes.stderr",
+            "type": "FILE"
+        },
+        {
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/script",
+            "name": "commandScript",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/script",
+            "description": "MultiStep.SliceBytes.commandScript",
+            "type": "FILE"
+        },
+        {
+            "url": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/13107200-13107200.slice",
+            "name": "MultiStep.SliceBytes.output.0",
+            "path": "/tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/13107200-13107200.slice",
+            "description": "MultiStep.SliceBytes.output.0",
+            "type": "FILE"
+        }
+    ],
+    "logs": [
+        {
+            "start_time": "2019-05-06T00:48:39.479152+00:00",
+            "metadata": {},
+            "system_logs": "[]",
+            "end_time": "2019-05-06T00:49:26.025487+00:00",
+            "outputs": [],
+            "logs": [
+                {
+                    "stderr": "/bin/bash: /tes-wd/shared/MultiStep/600f4b49-aefd-41fc-9797-94e5b781b0bb/call-SliceBytes/shard-1/execution/script: No such file or directory\n",
+                    "exit_code": 127,
+                    "start_time": "2019-05-06 00:48:39.519683+00:00",
+                    "stdout": "",
+                    "end_time": "2019-05-06 00:48:49.794646+00:00"
+                }
+            ]
+        }
+    ],
+    "name": "MultiStep.SliceBytes",
+    "resources": {
+        "ram_gb": 0,
+        "disk_gb": 0,
+        "cpu_cores": 0,
+        "zones": "",
+        "preemptible": true
+    },
+    "id": "c729708f-6a16-4142-8835-d994ce11f073",
+    "description": "600f4b49-aefd-41fc-9797-94e5b781b0bb:BackendJobDescriptorKey_CommandCallNode_MultiStep.SliceBytes:1:1",
+    "creation_time": "2019-05-06T00:48:39.479152+00:00",
+    "state": "COMPLETE"
+}

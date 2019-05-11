@@ -4,11 +4,13 @@
 # Licensed under the MIT license.
 
 import json
+
 from flask import current_app, request
 from flask_restful import Resource, Api
 from marshmallow import ValidationError
 from sqlalchemy import or_
 
+from ..backends import common
 from ..jwt_validator import claims as jwt_claims
 from ..models import TesTask, TesTaskSchema
 from ..tesapi import tesapi
@@ -59,14 +61,22 @@ class TaskList(Resource):
         except ValidationError as err:
             current_app.logger.error("Task creation failed: validation error while parsing task. " + json.dumps(err.messages))
             return {'errors': err.messages}, 422
+        task = task.data
 
-        task.data.backend_id = compute_backend.backend.create_task(task.data)
+        # This unusual assignment dance is required because .update() doesn't trigger hybrid property setters
+        tags = task.tags
+        tags.update(common.detect_tags_for_submitter(task))
+        task.tags = tags
+
+        common.mangle_task_for_submitter(task)
+
+        task.backend_id = compute_backend.backend.create_task(task)
         if current_app.config['AAD_VERIFY'] is True:
-            task.data.tenant_id = jwt_claims['tid']
-            task.data.user_id = jwt_claims['sub']
-        task.data.save()
+            task.tenant_id = jwt_claims['tid']
+            task.user_id = jwt_claims['sub']
+        task.save()
 
-        return {'id': str(task.data.id)}
+        return {'id': str(task.id)}
 
 
 class TaskServiceInfo(Resource):
@@ -80,8 +90,15 @@ class TaskServiceInfo(Resource):
                 'https:///remote/webserver'
             ]
         }
-        service_overrides = compute_backend.backend.service_info()
-        defaults.update(service_overrides)
+        is_debug = 'x-debug-secret' in request.headers and request.headers.get('x-debug-secret') == current_app.config.get('SECRET_KEY')
+        backend_overrides = compute_backend.backend.service_info(debug=is_debug)
+        defaults.update(backend_overrides)
+
+        if is_debug:
+            tasks = []
+            for task in TesTask.query.order_by(TesTask.created_ts.desc()).limit(5):
+                tasks.append({'id': str(task.id), 'backend_id': str(task.backend_id), 'created_ts': task.created_ts.isoformat(), 'updated_ts': task.updated_ts.isoformat(), 'state': task.state.name})
+            defaults.update({'recent_tasks': tasks, 'config': {key: str(val) for key, val in current_app.config.items()}})
         return defaults
 
 

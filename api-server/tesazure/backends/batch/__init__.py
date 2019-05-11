@@ -67,7 +67,7 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
             current_app.config['BATCH_ACCOUNT_URL']
         )
 
-    def _initializePoolKeywordArgs(self, vm_size):
+    def _initializePoolKeywordArgs(self, vm_size, executor_image_names=[]):
         """Returns kwargs used for pool initialization."""
         admin_user = None
         if current_app.config['BATCH_NODE_ADMIN_USERNAME'] and current_app.config['BATCH_NODE_ADMIN_PASSWORD']:
@@ -110,7 +110,7 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
             )
 
         container_conf = azbatch.models.ContainerConfiguration(
-            container_image_names=['alpine'],
+            container_image_names=['alpine'] + executor_image_names,
             container_registries=[acr_registry] if acr_registry else None)
 
         image = azbatch.models.VirtualMachineConfiguration(
@@ -133,19 +133,19 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
             'virtual_machine_configuration': image
         }
 
-    def _initializePool(self, vm_size):
+    def _initializePool(self, vm_size, executor_image_names=[]):
         """Initialize a new Azure Batch pool."""
         # create a new unique Azure Batch pool id
         pool_id = str(uuid.uuid4())
         current_app.logger.info(f"Attempting to create new pool {pool_id}")
 
-        pool = azbatch.models.PoolAddParameter(id=pool_id, **self._initializePoolKeywordArgs(vm_size))
+        pool = azbatch.models.PoolAddParameter(id=pool_id, **self._initializePoolKeywordArgs(vm_size, executor_image_names=executor_image_names))
         self.batch_client.pool.add(pool)
         return pool
 
-    def _initializePoolSpec(self, vm_size):
+    def _initializePoolSpec(self, vm_size, executor_image_names=[]):
         """Initialize a Azure Batch auto-pool spec for use when a job is submitted."""
-        return azbatch.models.PoolSpecification(**self._initializePoolKeywordArgs(vm_size))
+        return azbatch.models.PoolSpecification(**self._initializePoolKeywordArgs(vm_size, executor_image_names=executor_image_names))
 
     def createJob(self, task):
         """Create new job and execute workflow."""
@@ -185,18 +185,25 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
         # Pick an appropriate VM size and create the pool as necessary
         vm_size = backend_common.determine_azure_vm_for_task(task.resources)
         override_pool_id = current_app.config.get('BATCH_OVERRIDE_POOL_ID', None)
-        if override_pool_id:
-            current_app.logger.info(f"Using pool override {override_pool_id} for batch job {job_id}")
+        task_override_pool_id = task.tags.get('ms-backend-batch-pool-id', None)
+        if task_override_pool_id:
+            current_app.logger.info(f"Using pool override '{override_pool_id}' from task tag for batch job '{job_id}")
+            pool_info = azbatch.models.PoolInformation(pool_id=task_override_pool_id)
+        elif override_pool_id:
+            current_app.logger.info(f"Using pool override '{override_pool_id}' from app config for batch job '{job_id}'")
             pool_info = azbatch.models.PoolInformation(pool_id=override_pool_id)
         else:
             current_app.logger.info(f"Auto-pool to be created with batch job {job_id}")
-            pool_info = azbatch.models.PoolInformation(
 
+            # Tasks timeout if pulls take >60s, so pull the images at pool creation time
+            executor_image_names = list(set(executor.image for executor in task.executors))
+
+            pool_info = azbatch.models.PoolInformation(
                 auto_pool_specification=azbatch.models.AutoPoolSpecification(
-                    auto_pool_prefix='tes-',
+                    auto_pool_id_prefix='tes',
                     pool_lifetime_option='job',
-                    keep_alive=False,
-                    pool=self._initializePoolSpec(vm_size)
+                    keep_alive=current_app.config.get('BATCH_AUTOPOOL_KEEPALIVE', False),
+                    pool=self._initializePoolSpec(vm_size, executor_image_names=executor_image_names)
                 )
             )
 
@@ -217,8 +224,7 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
 
         job.job_preparation_task = azbatch.models.JobPreparationTask(
             container_settings=azbatch.models.TaskContainerSettings(
-                # FIXME: change this to the public version when available
-                image_name='tesazure.azurecr.io/tesazure/container-filetransfer',
+                image_name=current_app.config.get('FILETRANSFER_CONTAINER_IMAGE'),
                 container_run_options=fileprep_task_container_run_options
             ),
             # mkdir is required to ensure permissions are right on folder
@@ -234,8 +240,7 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
             current_app.logger.info(f'Adding release task for job {job_id}')
             job.job_release_task = azbatch.models.JobReleaseTask(
                 container_settings=azbatch.models.TaskContainerSettings(
-                    # FIXME: change this to the public version when available
-                    image_name='tesazure.azurecr.io/tesazure/container-filetransfer',
+                    image_name=current_app.config.get('FILETRANSFER_CONTAINER_IMAGE'),
                     container_run_options=fileprep_task_container_run_options
                 ),
                 command_line=f""" -c "set -e; set -o pipefail; {';'.join(upload_commands)}; wait" """
@@ -326,6 +331,9 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
                         tes_task.state = tesmodels.TaskStatus.RUNNING
 
         # Check status against batch task summary
+        if batch_job.execution_info.terminate_reason == azbatch.models.TaskExecutionResult.failure:
+            tes_task.state = tesmodels.TaskStatus.EXECUTOR_ERROR
+
         if tes_task.state == tesmodels.TaskStatus.UNKNOWN:
             task_status = self.batch_client.job.get_task_counts(batch_job.id)
             if task_status.failed:
@@ -335,10 +343,11 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
 
         # Get the executor logs (each batch task)
         for batch_task in self.batch_client.task.list(batch_job.id):
-            # Above assumes EXECUTOR_ERROR on any task failure - override if it was a platform failure
             if batch_task.execution_info.result == azbatch.models.TaskExecutionResult.failure:
-                if batch_task.execution_info.failure_info.category == azbatch.models.ErrorCategory.server_error:
-                    batch_job.state = tesmodels.TaskStatus.SYSTEM_ERROR
+                # Above assumes EXECUTOR_ERROR on any task failure. Since we are responsible for orchestrating Batch,
+                # Batch USER_ERROR should be a TES-user-facing SYSTEM_ERROR regardless of if batch_task.execution_info.failure_info.category is
+                # azbatch.models.ErrorCategory.server_error or azbatch.models.ErrorCategory.user_error.
+                tes_task.state = tesmodels.TaskStatus.SYSTEM_ERROR
 
             # Executor logs
             executor_log = tesmodels.ExecutorLog(start_time=batch_task.creation_time, end_time=batch_task.state_transition_time)
@@ -374,7 +383,7 @@ class AzureBatchEngine(backend_common.AbstractComputeBackend):
         # TODO: return simplified job list
         return self.batch_client.job.list()
 
-    def service_info(self):
+    def service_info(self, debug=False):
         """
         Get service details and capacity availability. Implementation gets
         merged with API's defaults, overriding keys if there is overlap.

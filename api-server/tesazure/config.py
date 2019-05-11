@@ -1,4 +1,5 @@
 # coding: utf-8
+# flake8: noqa E266
 
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
@@ -22,17 +23,30 @@ class base_config(object, metaclass=MetaFlaskEnv):
 
     SUPPORTED_LOCALES = ['en']
 
-    # Requests are logged via OpenCensus.
-    APPINSIGHTS_DISABLE_REQUEST_LOGGING = True
-    APPINSIGHTS_DISABLE_TRACE_LOGGING = False
-    APPINSIGHTS_DISABLE_EXCEPTION_LOGGING = False
-    APPINSIGHTS_INSTRUMENTATIONKEY = None
-
+    #
+    ## Common
+    #
     COMPUTE_BACKEND = "mock"  # among ['mock', 'aks', 'batch']
 
     STORAGE_ACCOUNT_NAME = ''
     STORAGE_ACCOUNT_KEY = ''
 
+    PRIVATE_DOCKER_REGISTRY_URL = None  # "myregistry.azurecr.io"
+    PRIVATE_DOCKER_REGISTRY_USERNAME = "username"
+    PRIVATE_DOCKER_REGISTRY_PASSWORD = "password"
+    FILETRANSFER_CONTAINER_IMAGE = 'azuretes.azurecr.io/tesazure/container-filetransfer:latest'  # FIXME: change this to the public version when available
+
+    #
+    ## Logging - App Insights / OpenCensus.
+    #
+    APPINSIGHTS_DISABLE_REQUEST_LOGGING = True
+    APPINSIGHTS_DISABLE_TRACE_LOGGING = False
+    APPINSIGHTS_DISABLE_EXCEPTION_LOGGING = False
+    APPINSIGHTS_INSTRUMENTATIONKEY = None
+
+    #
+    ## AAD User verification and task restrictions
+    #
     AAD_VERIFY = False
     AAD_AUDIENCE = 'aad-client-id'
     AAD_TENANT_ID = 'aad-tenant-id'
@@ -42,7 +56,9 @@ class base_config(object, metaclass=MetaFlaskEnv):
     # Anything other than None requires AAD_VERIFY to be True
     TASK_ACCESS_RESTRICTIONS = None
 
-    # batch engine config
+    #
+    ## Backend - Batch
+    #
     BATCH_ACCOUNT_NAME = ''
     BATCH_ACCOUNT_KEY = ''
     BATCH_ACCOUNT_URL = ''
@@ -53,17 +69,20 @@ class base_config(object, metaclass=MetaFlaskEnv):
     BATCH_POOL_LOW_PRIORITY_NODE_COUNT = 1
     BATCH_NODE_ADMIN_USERNAME = None
     BATCH_NODE_ADMIN_PASSWORD = None
+    BATCH_AUTOPOOL_KEEPALIVE = False
 
-    PRIVATE_DOCKER_REGISTRY_URL = None  # "myregistry.azurecr.io"
-    PRIVATE_DOCKER_REGISTRY_USERNAME = "username"
-    PRIVATE_DOCKER_REGISTRY_PASSWORD = "password"
-
-    # Replace with KeyVault URL and SPN info for access
+    #
+    ## Key Vault
+    #
     KEYVAULT_URL = None
     KEYVAULT_SECRETS_PREFIX = "TESAZURE-"
     AZURE_CLIENT_ID = None
     AZURE_SECRET = None
     AZURE_TENANT = None
+
+    #
+    ## Background tasks
+    #
 
     # Used by celery beat scheduler container
     CELERY_BEAT_SCHEDULE = {
@@ -75,6 +94,11 @@ class base_config(object, metaclass=MetaFlaskEnv):
     TASK_BACKEND_CLEANUP_HOURS = 24
     TASK_DATABASE_CLEANUP_HOURS = 48
     TASK_EXECUTION_TIMEOUT_HOURS = 12
+
+    #
+    ## Workflow engine-specific
+    #
+    CROMWELL_STORAGE_CONTAINER_NAME = "cromwell"
 
 
 class dev_config(base_config, metaclass=MetaFlaskEnv):
@@ -98,8 +122,8 @@ class dev_config(base_config, metaclass=MetaFlaskEnv):
 class test_config(base_config, metaclass=MetaFlaskEnv):
     """Testing configuration options."""
     ENV_PREFIX = 'APP_'
+    ENV = 'test'
 
-    TESTING = True
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = 'sqlite:///memory'
 

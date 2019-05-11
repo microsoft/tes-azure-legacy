@@ -10,11 +10,8 @@ azure-storage-blob = "*"
 boto3 = "*"
 google-cloud-storage = "*"
 paramiko = "*"
-pycosio = {editable = true,git = "https://github.com/Accelize/pycosio"}
+pycosio = {editable = true,git = "https://github.com/stewartadam/pycosio"}
 python-dateutil = "*"
 requests = "*"
 rfc6266 = "*"
 urllib3 = "*"
-
-[requires]
-python_version = "3.6"

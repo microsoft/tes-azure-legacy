@@ -1,0 +1,60 @@
+{
+  "name": "wf_hello.hello",
+  "description": "0911c1c7-de5d-442f-94e8-31814a035f8c:BackendJobDescriptorKey_CommandCallNode_wf_hello.hello:-1:1",
+  "executors": [
+    {
+      "image": "ubuntu:latest",
+      "command": [
+        "/bin/bash",
+        "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/script"
+      ],
+      "environment": {
+      	"key": "value"
+      },
+      "stdout": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stdout",
+      "stderr": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stderr"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "rc",
+      "path": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/rc",
+      "url": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/rc",
+      "description": "wf_hello.hello.rc",
+      "type": "FILE"
+    },
+    {
+      "name": "stdout",
+      "path": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stdout",
+      "url": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stdout",
+      "description": "wf_hello.hello.stdout",
+      "type": "FILE"
+    },
+    {
+      "name": "stderr",
+      "path": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stderr",
+      "url": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stderr",
+      "description": "wf_hello.hello.stderr",
+      "type": "FILE"
+    },
+    {
+      "name": "commandScript",
+      "path": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/script",
+      "url": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/script",
+      "description": "wf_hello.hello.commandScript",
+      "type": "FILE"
+    }
+  ],
+  "inputs": [
+    {
+      "name": "commandScript",
+      "path": "/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/script",
+      "description": "wf_hello.hello.commandScript",
+      "content": "#!/bin/bash\n\ncd /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution\ntmpDir=$(mkdir -p \"/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/tmp.ec7153dc\" && echo \"/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/tmp.ec7153dc\")\nchmod 777 \"$tmpDir\"\nexport _JAVA_OPTIONS=-Djava.io.tmpdir=\"$tmpDir\"\nexport TMPDIR=\"$tmpDir\"\nexport HOME=\"$HOME\"\n(\ncd /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution\n\n)\nout0911c1c7=\"${tmpDir}/out.$$\" err0911c1c7=\"${tmpDir}/err.$$\"\nmkfifo \"$out0911c1c7\" \"$err0911c1c7\"\ntrap 'rm \"$out0911c1c7\" \"$err0911c1c7\"' EXIT\ntee '/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stdout' < \"$out0911c1c7\" &\ntee '/tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/stderr' < \"$err0911c1c7\" >&2 &\n(\ncd /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution\n\n\necho \"Hello World! Welcome to Cromwell . . . on Azure!\"\n)  > \"$out0911c1c7\" 2> \"$err0911c1c7\"\necho $? > /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/rc.tmp\n(\n# add a .file in every empty directory to facilitate directory delocalization on the cloud\ncd /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution\nfind . -type d -empty -print0 | xargs -0 -I % touch %/.file\n)\n(\ncd /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution\nsync\n\n\n)\nmv /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/rc.tmp /tes-wd/shared/wf_hello/0911c1c7-de5d-442f-94e8-31814a035f8c/call-hello/execution/rc\n",
+      "type": "FILE"
+    }
+  ],
+  "resources": {
+    "preemptible": false
+  }
+}
