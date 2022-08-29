@@ -63,7 +63,7 @@ msrest==0.6.6
 msrestazure==0.6.0
 oauthlib==3.0.1
 opencensus==0.1.10
-protobuf==3.7.1
+protobuf==3.15.0
 psycopg2-binary==2.8.2
 pyasn1-modules==0.2.4
 pyasn1==0.4.5
