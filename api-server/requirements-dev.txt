@@ -32,4 +32,4 @@ tox==3.9.0
 traceback2==1.4.0
 unittest2==1.1.0
 virtualenv==16.4.3
-werkzeug==0.15.3
+werkzeug==0.15.5
