@@ -1,5 +1,5 @@
 # DEPRECATION NOTICE
-This project is deprecated and is no longer maintained. The repository is due to be archived and renamed.
+This project is deprecated and is no longer maintained. The repository is due to be archived and renamed. Please see the [GA4gh TES API](https://github.com/microsoft/ga4gh-tes)  repository for a more robust and up-to-date solution.
 
 ### License
 Licensed under the [MIT](LICENSE.md) License.
